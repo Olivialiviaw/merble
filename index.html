@@ -13,37 +13,37 @@
      ========================================================= */
   :root {
     /* Brand */
-    --teal-900: #014B56;
-    --teal-800: #00626D;
-    --teal-700: #007380;
+    --teal-900: #014B56;   /* Deep Teal — depth, authority */
+    --teal-800: #00626D;   /* Primary Teal — trust, stability */
+    --teal-700: #007380;   /* Secondary Teal — balance, clarity */
     --cyan-dot: #00A1CD;
 
-    /* Signal */
-    --amber-600: #FC9900;
-    --amber-400: #FFBB18;
-    --amber-200: #FFCE71;
-    --mint-200:  #7CCAC5;
+    /* Signal — accent warm */
+    --amber-600: #FC9900;  /* Accent Orange — energy, action */
+    --amber-400: #FFBB18;  /* Accent Gold — optimism, growth */
+    --amber-200: #FFCE71;  /* Soft Gold — warmth, positivity */
+    --mint-200:  #7CCAC5;  /* legacy — kept for backward compat, avoid in new use */
 
-    /* Semantic status */
-    --positive: #2B8F6F;
-    --warning:  #FC9900;
-    --danger:   #D04B4B;
-    --info:     #007380;
+    /* Semantic status — mapped onto brand palette only */
+    --positive: #00626D;   /* maps to Primary Teal */
+    --warning:  #FC9900;   /* maps to Accent Orange */
+    --danger:   #FC9900;   /* maps to Accent Orange (darker tone via shadow/border) */
+    --info:     #007380;   /* maps to Secondary Teal */
 
     /* Surface tints */
     --teal-50:  #DDE9EC;
     --amber-50: #FFF1D9;
-    --red-50:   #F7DEDE;
+    --red-50:   #FFE7CC;   /* warm accent surface */
 
-    /* Neutrals */
-    --n-0:    #FFFFFF;
-    --n-50:   #F9FAFB;
-    --n-100:  #F3F4F6;
-    --n-200:  #E5E7EB;
-    --n-700:  #6A7282;
-    --n-800:  #4A5565;
-    --n-950:  #101828;
-    --ink:    #0A0A0A;
+    /* Neutrals — aligned to new system: White / Off-White / Cool Gray ramp / Text Primary */
+    --n-0:    #FFFFFF;     /* White — surfaces, cards */
+    --n-50:   #F6F8FA;     /* Off-White — page background */
+    --n-100:  #F0F3F6;     /* derived between off-white and CG200 */
+    --n-200:  #E6ECF2;     /* Cool Gray 200 — borders, dividers */
+    --n-700:  #64748B;     /* Cool Gray 600 — secondary text, muted */
+    --n-800:  #475569;     /* darker secondary */
+    --n-950:  #0F172A;     /* Text Primary — headings */
+    --ink:    #0F172A;     /* alias */
 
     /* Spacing scale (4-pt rhythm) */
     --space-1: 4px;
@@ -431,20 +431,59 @@
   }
 
   /* =========================================================
-     KPI STRIP
+     KPI STRIP — plain cells only (no group inside)
      ========================================================= */
+  .kpi-strip-row {
+    display: flex;
+    gap: var(--space-4);
+    align-items: stretch;
+  }
   .kpi-strip {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    display: flex;
     background: var(--n-0);
     border: 1px solid var(--n-200);
     border-radius: var(--r-xl);
-    box-shadow:
-      var(--shadow-sm),
-      inset 0 1px 0 rgba(255, 255, 255, 0.9);
-    overflow: hidden;
+    box-shadow: var(--shadow-sm), inset 0 1px 0 rgba(255,255,255,0.9);
     position: relative;
+    flex: 1;
+    overflow: visible;
   }
+  .kpi-strip .kpi { flex: 1; }
+  /* When strip uses grid (e.g. Signal page with embedded group) */
+  .kpi-strip[style*="grid"] { display: grid; }
+
+  /* kpi-primary-group — sibling card next to the strip, wrapped in gradient border */
+  .kpi-primary-group {
+    display: flex;
+    position: relative;
+    border-radius: var(--r-xl);
+    background: var(--n-0);
+    overflow: hidden;
+    flex-shrink: 0;
+    min-width: 420px;
+    box-shadow: var(--shadow-sm);
+  }
+  .kpi-primary-group::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    padding: 2px;
+    background: var(--grad-linear);
+    border-radius: var(--r-xl);
+    -webkit-mask:
+      linear-gradient(#fff 0 0) content-box,
+      linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+            mask-composite: exclude;
+    pointer-events: none;
+    z-index: 2;
+  }
+  .kpi-primary-group .kpi {
+    flex: 1;
+    border-right: 1px solid var(--n-100) !important;
+  }
+  .kpi-primary-group .kpi:last-child { border-right: none !important; }
+
   .kpi {
     padding: var(--space-6) var(--space-6) var(--space-5);
     border-right: 1px solid var(--n-100);
@@ -466,35 +505,9 @@
     line-height: 1;
     font-variant-numeric: tabular-nums;
   }
-  .kpi.primary {
-    background: var(--n-0);
-    position: relative;
-    z-index: 1;
-    border-radius: var(--r-xl);
-  }
+  .kpi.primary { background: var(--n-0); }
   .kpi.primary .kpi-value { color: var(--teal-700); }
-  .kpi.primary::before {
-    content: '';
-    position: absolute;
-    top: 0; left: 0; right: 0; bottom: 0;
-    padding: 2px;
-    background: var(--grad-linear);
-    border-radius: var(--r-xl);
-    -webkit-mask:
-      linear-gradient(#fff 0 0) content-box,
-      linear-gradient(#fff 0 0);
-    -webkit-mask-composite: xor;
-            mask-composite: exclude;
-    pointer-events: none;
-    height: auto;
-    width: auto;
-  }
-  /* Hide neighbor's right border when next to a primary kpi */
-  .kpi:has(+ .kpi.primary) {
-    border-right: none;
-  }
-  /* Hide primary's own right border so the gradient draws cleanly */
-  .kpi.primary { border-right: none; }
+  .kpi.primary::before { content: none; }
   .kpi-delta {
     margin-top: var(--space-4);
     font-size: 13px;
@@ -1062,8 +1075,22 @@
   .insight-cell {
     padding: var(--space-4);
     border-radius: var(--r-md);
-    background: var(--n-50);
-    border: 1px solid var(--n-100);
+    background: var(--n-0);
+    position: relative;
+  }
+  .insight-cell::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    padding: 1.5px;
+    background: var(--grad-linear);
+    border-radius: var(--r-md);
+    -webkit-mask:
+      linear-gradient(#fff 0 0) content-box,
+      linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+            mask-composite: exclude;
+    pointer-events: none;
   }
   .insight-cell-label {
     font-size: 11px;
@@ -1089,14 +1116,15 @@
     color: var(--n-700);
     line-height: 1.4;
   }
-  .insight-cell.positive { background: #EAF5F0; border-color: #C9E5D5; }
-  .insight-cell.positive .insight-cell-label { color: var(--positive); }
-  .insight-cell.warning  { background: var(--amber-50); border-color: #F5DCAA; }
-  .insight-cell.warning  .insight-cell-label { color: var(--amber-600); }
-  .insight-cell.info     { background: var(--teal-50); border-color: #B8D4DA; }
+  /* Semantic accent — only via the dot + label color, surface stays white */
+  .insight-cell.positive .insight-cell-label { color: var(--teal-700); }
+  .insight-cell.positive .insight-cell-label .swatch { background: var(--teal-700); }
+  .insight-cell.warning  .insight-cell-label { color: var(--amber-400); }
+  .insight-cell.warning  .insight-cell-label .swatch { background: var(--amber-400); }
   .insight-cell.info     .insight-cell-label { color: var(--teal-800); }
-  .insight-cell.danger   { background: var(--red-50); border-color: #E8C5C5; }
-  .insight-cell.danger   .insight-cell-label { color: var(--danger); }
+  .insight-cell.info     .insight-cell-label .swatch { background: var(--teal-800); }
+  .insight-cell.danger   .insight-cell-label { color: var(--amber-600); }
+  .insight-cell.danger   .insight-cell-label .swatch { background: var(--amber-600); }
 
   /* =========================================================
      ALERT ITEM
@@ -1349,7 +1377,7 @@
   /* Drop highlight ring on funnel row */
   .funnel-row.drop-highlight {
     background: var(--amber-50);
-    box-shadow: inset 0 0 0 1px #F5DCAA;
+    box-shadow: inset 0 0 0 1px var(--amber-200);
   }
 
   /* Updated timestamp */
@@ -1384,10 +1412,14 @@
     -webkit-backdrop-filter: blur(24px) saturate(180%);
     border-bottom: 1px solid rgba(229, 231, 235, 0.7);
     height: var(--site-header-h);
-    position: sticky;
+    position: fixed;
     top: 0;
+    left: 0;
+    right: 0;
     z-index: 50;
   }
+  /* Push everything below the fixed header down */
+  body { padding-top: var(--site-header-h); }
   .site-header-inner {
     height: 100%;
     display: flex;
@@ -1575,19 +1607,18 @@
   .kpi.emphasized {
     background: var(--teal-900);
     color: rgba(255, 255, 255, 0.85);
+    border-radius: var(--r-xl);
+    margin: 3px;
+    border-right: none !important;
   }
-  .kpi.emphasized .kpi-label {
-    color: rgba(255, 255, 255, 0.7);
-  }
-  .kpi.emphasized .kpi-value {
-    color: #FFFFFF;
-  }
-  .kpi.emphasized .kpi-delta {
-    color: rgba(255, 255, 255, 0.7);
-  }
-  .kpi.emphasized .delta-pos { color: #7FE3B8; }
-  .kpi.emphasized .delta-neg { color: #FF9999; }
+  .kpi.emphasized .kpi-label { color: rgba(255, 255, 255, 0.7); }
+  .kpi.emphasized .kpi-value { color: #FFFFFF; }
+  .kpi.emphasized .kpi-delta { color: rgba(255, 255, 255, 0.7); }
+  .kpi.emphasized .delta-pos { color: var(--amber-200); }
+  .kpi.emphasized .delta-neg { color: var(--amber-600); }
   .kpi.emphasized::before { display: none; }
+  /* Remove right border on the kpi that comes before emphasized */
+  .kpi:has(+ .kpi.emphasized) { border-right: none; }
 
   .kpi.highlight {
     background: var(--n-0);
@@ -1627,8 +1658,22 @@
     gap: var(--space-4);
     padding: var(--space-5) var(--space-6);
     background: linear-gradient(180deg, #FFF6E1 0%, #FFFBF1 100%);
-    border: 1px solid #F5DCAA;
     border-radius: var(--r-xl);
+    position: relative;
+  }
+  .action-summary::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    padding: 1.5px;
+    background: var(--grad-linear);
+    border-radius: var(--r-xl);
+    -webkit-mask:
+      linear-gradient(#fff 0 0) content-box,
+      linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+            mask-composite: exclude;
+    pointer-events: none;
   }
   .action-summary-body { display: flex; flex-direction: column; gap: 2px; }
   .action-summary-title {
@@ -1654,20 +1699,28 @@
   .insight-card {
     padding: var(--space-5);
     border-radius: var(--r-lg);
-    border: 1px solid transparent;
     display: flex;
     flex-direction: column;
     gap: var(--space-3);
     position: relative;
   }
-  .insight-card.warning {
-    background: linear-gradient(180deg, #FFF7E3 0%, #FFFCF1 100%);
-    border-color: #F5DCAA;
+  .insight-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    padding: 1.5px;
+    background: var(--grad-linear);
+    border-radius: var(--r-lg);
+    -webkit-mask:
+      linear-gradient(#fff 0 0) content-box,
+      linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+            mask-composite: exclude;
+    pointer-events: none;
+    z-index: 1;
   }
-  .insight-card.info {
-    background: linear-gradient(180deg, #E8F2F4 0%, #F4F9FA 100%);
-    border-color: #B8D4DA;
-  }
+  .insight-card.warning { background: linear-gradient(180deg, #FFF7E3 0%, #FFFCF1 100%); }
+  .insight-card.info    { background: linear-gradient(180deg, #E8F2F4 0%, #F4F9FA 100%); }
   .insight-card-title {
     font-size: 13px;
     font-weight: 700;
@@ -1792,7 +1845,7 @@
   }
   .h-funnel-fill.ok        { background: linear-gradient(180deg, #008090 0%, #006875 100%); }
   .h-funnel-fill.watch     { background: linear-gradient(180deg, #FFBB18 0%, #E8A600 100%); }
-  .h-funnel-fill.critical  { background: linear-gradient(180deg, #E15858 0%, #C33B3B 100%); }
+  .h-funnel-fill.critical  { background: linear-gradient(180deg, #FC9900 0%, #D87E00 100%); }
   .h-funnel-endpoint {
     position: absolute;
     width: 14px; height: 14px;
@@ -1827,9 +1880,9 @@
       inset 0 -1px 1px rgba(0, 0, 0, 0.1);
   }
   .h-funnel-endpoint.critical {
-    background: radial-gradient(circle at 38% 38%, #E26D6D 0%, #C33B3B 70%);
+    background: radial-gradient(circle at 38% 38%, #FFB347 0%, #D87E00 70%);
     box-shadow:
-      0 1px 3px rgba(168, 43, 43, 0.28),
+      0 1px 3px rgba(216, 126, 0, 0.28),
       inset 0 -1px 1px rgba(0, 0, 0, 0.1);
   }
   .h-funnel-ticks {
@@ -1900,15 +1953,27 @@
   .alert-rows { display: flex; flex-direction: column; gap: var(--space-3); }
   .alert-row {
     background: #FFFFFF;
-    border: 1px solid var(--n-200);
     border-radius: var(--r-lg);
     overflow: hidden;
-    transition: border-color 120ms ease, box-shadow 120ms ease;
+    position: relative;
+    transition: box-shadow 120ms ease;
   }
-  .alert-row:hover {
-    border-color: var(--n-700);
-    box-shadow: var(--shadow-sm);
+  .alert-row::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    padding: 1.5px;
+    background: var(--grad-linear);
+    border-radius: var(--r-lg);
+    -webkit-mask:
+      linear-gradient(#fff 0 0) content-box,
+      linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+            mask-composite: exclude;
+    pointer-events: none;
+    z-index: 1;
   }
+  .alert-row:hover { box-shadow: var(--shadow-md); }
   .alert-row-head {
     display: grid;
     grid-template-columns: 1fr auto auto;
@@ -2053,12 +2118,26 @@
      ========================================================= */
   .proactive-callout {
     background: linear-gradient(180deg, #E8F2F4 0%, #F4F9FA 100%);
-    border: 1px solid #B8D4DA;
     border-radius: var(--r-lg);
     padding: var(--space-5);
     display: flex;
     flex-direction: column;
     gap: var(--space-2);
+    position: relative;
+  }
+  .proactive-callout::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    padding: 1.5px;
+    background: var(--grad-linear);
+    border-radius: var(--r-lg);
+    -webkit-mask:
+      linear-gradient(#fff 0 0) content-box,
+      linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+            mask-composite: exclude;
+    pointer-events: none;
   }
   .proactive-callout-title {
     font-size: 14px;
@@ -2345,10 +2424,15 @@ const overviewPage = () => `
     <!-- Insight pair: What to Watch + Recommended Action -->
     <div class="insight-pair">
       <div class="insight-card warning">
-        <div class="insight-card-title">What to Watch</div>
-        <div class="insight-card-detail" style="font-size:12px;color:var(--n-700);font-weight:600;text-transform:uppercase;letter-spacing:0.04em">Biggest Drop-Off</div>
+        <div class="insight-card-title">
+          What to Watch
+          <span class="insight-card-pill">Drop-Off</span>
+        </div>
         <div class="insight-card-headline"><span class="accent-warning">Engaged → Inquiry</span></div>
-        <div class="insight-card-detail">54.1% drop-off detected — consider follow-up cadence</div>
+        <div class="insight-card-detail">54.1% drop-off detected — 19pp above industry benchmark. Members open outreach but aren't converting to inquiry.</div>
+        <div class="insight-card-footer">
+          <span class="insight-card-link" style="color:var(--amber-600)">Consider adding follow-up cadence</span>
+        </div>
       </div>
       <div class="insight-card info">
         <div class="insight-card-title">
@@ -2360,8 +2444,8 @@ const overviewPage = () => `
         <div class="insight-card-footer">
           <span class="insight-card-link">Estimated recovery: +200–300 inquiries</span>
           <div class="insight-card-pager">
-            <button>${ICONS.chevLeft || '‹'}</button>
-            <button>${ICONS.chevRight || '›'}</button>
+            <button>${ICONS.chevLeft}</button>
+            <button>${ICONS.chevRight}</button>
           </div>
         </div>
       </div>
@@ -2656,26 +2740,28 @@ const signalPage = () => `
 </div>
 
 <!-- KPI strip -->
-<div class="kpi-strip">
+<div class="kpi-strip" style="display:grid;grid-template-columns:1fr 1fr 2fr;">
   <div class="kpi">
-    <div class="kpi-label">Triggered</div>
+    <div class="kpi-label">Total Signals Volume</div>
     <div class="kpi-value">2,104</div>
-    <div class="kpi-delta"><span class="delta-pos">${ICONS.arrowUp} 22%</span><span>vs prior 90d</span></div>
+    <div class="kpi-delta"><span class="delta-pos">${ICONS.arrowUp} 12.4%</span><span>vs prior 90d</span></div>
   </div>
   <div class="kpi">
     <div class="kpi-label">Converted</div>
     <div class="kpi-value">712</div>
     <div class="kpi-delta"><span class="delta-pos">${ICONS.arrowUp} 31%</span><span>vs prior 90d</span></div>
   </div>
-  <div class="kpi primary">
-    <div class="kpi-label">Conversion Rate</div>
-    <div class="kpi-value">33.8%</div>
-    <div class="kpi-delta"><span class="delta-pos">${ICONS.arrowUp} 4.2pt</span><span>vs prior 90d</span></div>
-  </div>
-  <div class="kpi primary">
-    <div class="kpi-label">Avg Loan Size</div>
-    <div class="kpi-value">$184K</div>
-    <div class="kpi-delta"><span class="delta-pos">${ICONS.arrowUp} 8%</span><span>vs prior 90d</span></div>
+  <div class="kpi-primary-group" style="margin:3px 3px 3px 0;min-width:0;">
+    <div class="kpi primary">
+      <div class="kpi-label">Conversion Rate</div>
+      <div class="kpi-value">33.8%</div>
+      <div class="kpi-delta"><span class="delta-pos">${ICONS.arrowUp} 4.2pt</span><span>vs prior 90d</span></div>
+    </div>
+    <div class="kpi primary">
+      <div class="kpi-label">Avg Loan Size</div>
+      <div class="kpi-value">$184K</div>
+      <div class="kpi-delta"><span class="delta-pos">${ICONS.arrowUp} 8%</span><span>vs prior 90d</span></div>
+    </div>
   </div>
 </div>
 
